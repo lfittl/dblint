@@ -9,45 +9,17 @@ module Dblint
         # Ignored
       end
 
-      def statement_finished(name, id, payload)
-        return if ['CACHE', 'DBLINT', 'SCHEMA'].include?(payload[:name])
+      def statement_finished(_name, _id, payload)
+        return if %w(CACHE DBLINT SCHEMA).include?(payload[:name])
 
         @stats ||= {}
 
         connid = payload[:connection_id]
 
         if payload[:sql] == 'BEGIN'
-          @stats[connid] = {}
-          @stats[connid][:locks_held] = {}
-          @stats[connid][:existing_ids] = {}
-
-          ActiveRecord::Base.connection.tables.each do |table|
-            next if table == 'schema_migrations'
-            @stats[connid][:existing_ids][table] = ActiveRecord::Base.connection.select_values("SELECT id FROM #{table}", 'DBLINT')
-          end
-
+          handle_begin(connid)
         elsif payload[:sql] == 'COMMIT'
-          @stats[connid][:locks_held].each do |table, details|
-            next if details[:count] < 10
-
-            main_app_caller = caller.find { |f| f.start_with?(Rails.root.to_s) }
-            main_app_caller.slice!(Rails.root.to_s + '/')
-            main_app_dir    = main_app_caller[/^\w+/]
-
-            next if ['spec', 'test'].include?(main_app_dir)
-
-            error_msg = format("Lock on %s held for %d statements (%0.2f ms) by '%s', transaction started by %s",
-                               table.inspect, details[:count], Time.now - details[:started_at], details[:sql],
-                               main_app_caller)
-
-            if details[:count] > 15
-              # We need an explicit begin here since we're interrupting the transaction flow
-              ActiveRecord::Base.connection.execute('BEGIN')
-              fail Error.new(error_msg)
-            else
-              puts format('Warning: %s', error_msg)
-            end
-          end
+          handle_commit(connid)
         elsif payload[:sql] == 'ROLLBACK'
           # do nothing
         elsif @stats[connid].present?
@@ -81,6 +53,41 @@ module Dblint
         @stats[connid][:locks_held][tuple][:sql]   = payload[:sql]
         @stats[connid][:locks_held][tuple][:count] = 0
         @stats[connid][:locks_held][tuple][:started_at] = Time.now
+      end
+
+      def handle_begin(connid)
+        @stats[connid] = {}
+        @stats[connid][:locks_held] = {}
+        @stats[connid][:existing_ids] = {}
+
+        ActiveRecord::Base.connection.tables.each do |table|
+          next if table == 'schema_migrations'
+          @stats[connid][:existing_ids][table] = ActiveRecord::Base.connection.select_values("SELECT id FROM #{table}", 'DBLINT')
+        end
+      end
+
+      def handle_commit(connid)
+        @stats[connid][:locks_held].each do |table, details|
+          next if details[:count] < 10
+
+          main_app_caller = caller.find { |f| f.start_with?(Rails.root.to_s) }
+          main_app_caller.slice!(Rails.root.to_s + '/')
+          main_app_dir    = main_app_caller[/^\w+/]
+
+          next if %w(spec test).include?(main_app_dir)
+
+          error_msg = format("Lock on %s held for %d statements (%0.2f ms) by '%s', transaction started by %s",
+                             table.inspect, details[:count], Time.now - details[:started_at], details[:sql],
+                             main_app_caller)
+
+          if details[:count] > 15
+            # We need an explicit begin here since we're interrupting the transaction flow
+            ActiveRecord::Base.connection.execute('BEGIN')
+            fail Error, error_msg
+          else
+            puts format('Warning: %s', error_msg)
+          end
+        end
       end
     end
   end

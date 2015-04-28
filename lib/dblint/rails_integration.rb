@@ -19,5 +19,5 @@ module Dblint
     end
   end
 
-  ActiveSupport::Notifications.subscribe("sql.active_record", RailsIntegration.new)
+  ActiveSupport::Notifications.subscribe('sql.active_record', RailsIntegration.new)
 end

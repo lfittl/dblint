@@ -46,6 +46,10 @@ module Dblint
 
         tuple = [locked_table, bind[1]]
 
+        # We only want tuples that were not created in this transaction
+        existing_ids = @stats[connid][:existing_ids][tuple[0]]
+        return unless existing_ids.present? && existing_ids.include?(tuple[1])
+
         # We've done two UPDATEs to the same row in this transaction
         return if @stats[connid][:locks_held][tuple].present?
 
@@ -62,7 +66,7 @@ module Dblint
 
         ActiveRecord::Base.connection.tables.each do |table|
           next if table == 'schema_migrations'
-          @stats[connid][:existing_ids][table] = ActiveRecord::Base.connection.select_values("SELECT id FROM #{table}", 'DBLINT')
+          @stats[connid][:existing_ids][table] = ActiveRecord::Base.connection.select_values("SELECT id FROM #{table}", 'DBLINT').map(&:to_i)
         end
       end
 

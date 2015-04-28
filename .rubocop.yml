@@ -16,7 +16,10 @@ MethodLength:
 ClassLength:
   Enabled: false
 
-Style/BlockNesting:
+Metrics/BlockNesting:
+  Enabled: false
+
+Metrics/AbcSize:
   Enabled: false
 
 Style/ModuleFunction:

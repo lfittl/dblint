@@ -41,6 +41,8 @@ module Dblint
                                main_app_caller)
 
             if details[:count] > 15
+              # We need an explicit begin here since we're interrupting the transaction flow
+              ActiveRecord::Base.connection.execute('BEGIN')
               fail Error.new(error_msg)
             else
               puts format('Warning: %s', error_msg)

@@ -4,7 +4,8 @@ module Dblint
       class Error < StandardError; end
 
       def initialize
-        @stats = {}
+        @locks_held = {}
+        @existing_ids = {}
       end
 
       def statement_started(_name, _id, _payload)
@@ -18,7 +19,7 @@ module Dblint
           handle_commit
         elsif payload[:sql] == 'ROLLBACK'
           # do nothing
-        elsif @stats.present?
+        elsif @existing_ids.present?
           increment_locks_held
           add_new_locks_held(payload)
         end
@@ -27,7 +28,7 @@ module Dblint
       private
 
       def increment_locks_held
-        @stats[:locks_held].each do |_, lock|
+        @locks_held.each do |_, lock|
           lock[:count] += 1
         end
       end
@@ -43,31 +44,30 @@ module Dblint
         tuple = [locked_table, bind[1]]
 
         # We only want tuples that were not created in this transaction
-        existing_ids = @stats[:existing_ids][tuple[0]]
+        existing_ids = @existing_ids[tuple[0]]
         return unless existing_ids.present? && existing_ids.include?(tuple[1])
 
         # We've done two UPDATEs to the same row in this transaction
-        return if @stats[:locks_held][tuple].present?
+        return if @locks_held[tuple].present?
 
-        @stats[:locks_held][tuple] = {}
-        @stats[:locks_held][tuple][:sql]   = payload[:sql]
-        @stats[:locks_held][tuple][:count] = 0
-        @stats[:locks_held][tuple][:started_at] = Time.now
+        @locks_held[tuple] = {}
+        @locks_held[tuple][:sql]   = payload[:sql]
+        @locks_held[tuple][:count] = 0
+        @locks_held[tuple][:started_at] = Time.now
       end
 
       def handle_begin
-        @stats = {}
-        @stats[:locks_held] = {}
-        @stats[:existing_ids] = {}
+        @locks_held = {}
+        @existing_ids = {}
 
         ActiveRecord::Base.connection.tables.each do |table|
           next if table == 'schema_migrations'
-          @stats[:existing_ids][table] = ActiveRecord::Base.connection.select_values("SELECT id FROM #{table}", 'DBLINT').map(&:to_i)
+          @existing_ids[table] = ActiveRecord::Base.connection.select_values("SELECT id FROM #{table}", 'DBLINT').map(&:to_i)
         end
       end
 
       def handle_commit
-        @stats[:locks_held].each do |table, details|
+        @locks_held.each do |table, details|
           next if details[:count] < 10
 
           main_app_caller = find_main_app_caller(caller)

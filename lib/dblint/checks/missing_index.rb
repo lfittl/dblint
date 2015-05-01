@@ -1,8 +1,6 @@
 module Dblint
   module Checks
-    module MissingIndex
-      extend self
-
+    class MissingIndex < Base
       class Error < StandardError; end
 
       def statement_started(_name, _id, payload)
@@ -29,10 +27,8 @@ module Dblint
 
       def raise_on_seqscan(plan, payload)
         if plan['Node Type'] == 'Seq Scan' && plan['Filter'].present?
-          main_app_caller = caller.find { |f| f.start_with?(Rails.root.to_s) }
-          main_app_caller.slice!(Rails.root.to_s + '/')
-          main_app_dir    = main_app_caller[/^\w+/]
-          return if %w(spec test).include?(main_app_dir)
+          main_app_caller = find_main_app_caller(caller)
+          return unless main_app_caller.present?
 
           error_msg = format("Missing index on %s for '%s' in '%s', called by %s",
                              plan['Relation Name'], plan['Filter'], payload[:sql], main_app_caller)

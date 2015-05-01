@@ -7,6 +7,7 @@ RSpec.configure do |config|
 
       create_table :minions, force: true do |t|
         t.string :name
+        t.string :ident, index: true
         t.timestamps null: false
       end
 

@@ -10,8 +10,6 @@ module Dblint
       end
 
       def statement_finished(_name, _id, payload)
-        return if %w(CACHE DBLINT SCHEMA).include?(payload[:name])
-
         @stats ||= {}
 
         connid = payload[:connection_id]
@@ -77,7 +75,6 @@ module Dblint
           main_app_caller = caller.find { |f| f.start_with?(Rails.root.to_s) }
           main_app_caller.slice!(Rails.root.to_s + '/')
           main_app_dir    = main_app_caller[/^\w+/]
-
           next if %w(spec test).include?(main_app_dir)
 
           error_msg = format("Lock on %s held for %d statements (%0.2f ms) by '%s', transaction started by %s",

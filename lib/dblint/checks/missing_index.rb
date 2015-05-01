@@ -30,6 +30,8 @@ module Dblint
           main_app_caller = find_main_app_caller(caller)
           return unless main_app_caller.present?
 
+          return if ignored?(main_app_caller)
+
           error_msg = format("Missing index on %s for '%s' in '%s', called by %s",
                              plan['Relation Name'], plan['Filter'], payload[:sql], main_app_caller)
           fail Error, error_msg

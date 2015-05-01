@@ -34,7 +34,25 @@ In this case it means that the `users` row has been locked for 29 statements (wh
 
 The correct fix for this depends on whether this is in user written code (i.e. a manual `ActiveRecord::Base.transaction` call), or caused by Rails built-ins like `touch: true` and `counter_cache: true`. In general you want to move that `UPDATE` to happen towards the end of the transaction, or move it completely outside (if you don't need the atomicity guarantee of the transaction).
 
-Note: Right now the missing index check is not implemented, and the lock check can't detect possible problems caused by non-DB activities (e.g. updating your search index inside the transaction).
+Note: Right now the lock check can't detect possible problems caused by non-DB activities (e.g. updating your search index inside the transaction).
+
+## Ignoring false positives
+
+Since in some cases there might be a valid reason to not have an index, or to hold a lock for longer,
+you can add ignores to the `.dblint.yml` file like this:
+
+```
+IgnoreList:
+  MissingIndex:
+    # Explain why you ignore it
+    - app/models/my_model.rb:20:in `load'
+  LongHeldLock:
+    # Explain why you ignore it
+    - app/models/my_model.rb:20:in `load'
+```
+
+The line you need to add is the first caller in the callstack from your main
+application, also included in the error message for the check.
 
 ## Contributing
 

@@ -73,6 +73,8 @@ module Dblint
           main_app_caller = find_main_app_caller(caller)
           next unless main_app_caller.present?
 
+          return if ignored?(main_app_caller)
+
           error_msg = format("Lock on %s held for %d statements (%0.2f ms) by '%s', transaction started by %s",
                              table.inspect, details[:count], Time.now - details[:started_at], details[:sql],
                              main_app_caller)

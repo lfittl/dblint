@@ -16,7 +16,13 @@ And then execute:
 
 ## Usage
 
-Run your tests as usual, for locking issues an exception will be raised if its severe enough:
+Run your tests as usual, `dblint` will raise an exception or output a warning should it detect a problem.
+
+Note that it will check the callstack for the problematic query, and only count it as an error if the callstack first line from within your app is not the `test` or `spec` directory. Therefore, should you use non-optimized code directly in your tests (e.g. as part of a factory), `dblint` will not raise an error.
+
+## Long held locks
+
+For locking issues an exception will be raised if its severe enough:
 
 ```
   1) Invites::AcceptInvite test

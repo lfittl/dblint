@@ -1,4 +1,4 @@
-# dblint [ ![Codeship Status for lfittl/dblint](https://img.shields.io/codeship/db703270-cfa3-0132-a2bb-623bdb9b8d89.svg)](https://codeship.com/projects/76752)
+# dblint [ ![](https://img.shields.io/gem/v/dblint.svg)](https://rubygems.org/gems/dblint) [ ![](https://img.shields.io/gem/dt/dblint.svg)](https://rubygems.org/gems/dblint) [ ![Codeship Status for lfittl/dblint](https://img.shields.io/codeship/db703270-cfa3-0132-a2bb-623bdb9b8d89.svg)](https://codeship.com/projects/76752)
 
 Automatically checks all SQL queries that are executed during your tests, to find common mistakes, including missing indices and locking issues due to long transactions.
 

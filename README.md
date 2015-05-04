@@ -99,4 +99,4 @@ application, also included in the error message for the check.
 ## License
 
 Copyright (c) 2015, Lukas Fittl <lukas@fittl.com><br>
-dblint is licensed under the MIT license, see LICENSE file for details.
+dblint is licensed under the MIT license, see LICENSE.txt file for details.

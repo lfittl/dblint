@@ -22,11 +22,29 @@ Note that it will check the callstack for the problematic query, and only count 
 
 ## Missing indices
 
-[ documentation coming soon ]
+`dblint` will find SELECT queries that might be missing an index:
+
+```
+Failures:
+
+  1) FeedsController#show 
+     Failure/Error: get :show, format: :atom
+     Dblint::Checks::MissingIndex::Error:
+       Missing index on oauth_applications for '((twitter_app_name)::text = 'My Feed App'::text)' in 'SELECT  "oauth_applications".* FROM "oauth_applications" WHERE "oauth_applications"."twitter_app_name" = $1 LIMIT 1', called by app/controllers/feeds_controller.rb:6:in `show'
+     # ./app/controllers/feeds_controller.rb:6:in `show'
+     # ./spec/controllers/feeds_controller_spec.rb:12:in `block (3 levels) in <top (required)>'
+     # ./spec/spec_helper.rb:78:in `block (2 levels) in <top (required)>'
+```
+
+This is done by `EXPLAIN`ing every SELECT statement run during your tests, and checking whether the execution plan contains a Sequential Scan that is filtered by a condition. Thus, if you were to do a count of all records, this check would not trigger.
+
+Nonetheless, there might still be false positives or simply cases where you don't want an index - use the ignore list in those cases.
+
+Note: `EXPLAIN` is run with `enable_seqscan = off` in order to avoid seeing a false positive Sequential Scan on indexed, but small tables (likely to happen with tests).
 
 ## Long held locks
 
-For locking issues an exception will be raised if its severe enough:
+`dblint` will find long held locks in database transactions, causing delays and possibly deadlocks:
 
 ```
   1) Invites::AcceptInvite test

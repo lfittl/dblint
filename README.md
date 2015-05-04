@@ -89,3 +89,14 @@ application, also included in the error message for the check.
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
+
+
+## Authors
+
+- [Lukas Fittl](mailto:lukas@fittl.com)
+
+
+## License
+
+Copyright (c) 2015, Lukas Fittl <lukas@fittl.com><br>
+dblint is licensed under the MIT license, see LICENSE file for details.

@@ -79,13 +79,14 @@ module Dblint
                              table.inspect, details[:count], Time.now - details[:started_at], details[:sql],
                              main_app_caller)
 
-          if details[:count] > 15
-            # We need an explicit begin here since we're interrupting the transaction flow
-            ActiveRecord::Base.connection.execute('BEGIN')
-            fail Error, error_msg
-          else
-            puts format('Warning: %s', error_msg)
-          end
+          next unless details[:count] > 15
+
+          # We need an explicit begin here since we're interrupting the transaction flow
+          ActiveRecord::Base.connection.execute('BEGIN')
+          fail Error, error_msg
+
+          # TODO: Add a config setting for enabling this as a warning
+          # puts format('Warning: %s', error_msg)
         end
       end
     end

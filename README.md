@@ -2,6 +2,7 @@
 
 Automatically checks all SQL queries that are executed during your tests, to find common mistakes, including missing indices and locking issues due to long transactions.
 
+
 ## Installation
 
 Add this line to your application's Gemfile:

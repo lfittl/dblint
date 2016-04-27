@@ -1,4 +1,4 @@
-# dblint [ ![](https://img.shields.io/gem/v/dblint.svg)](https://rubygems.org/gems/dblint) [ ![](https://img.shields.io/gem/dt/dblint.svg)](https://rubygems.org/gems/dblint) [ ![Codeship Status for lfittl/dblint](https://img.shields.io/codeship/db703270-cfa3-0132-a2bb-623bdb9b8d89.svg)](https://codeship.com/projects/76752)
+# dblint [ ![](https://img.shields.io/gem/v/dblint.svg)](https://rubygems.org/gems/dblint) [ ![](https://img.shields.io/gem/dt/dblint.svg)](https://rubygems.org/gems/dblint) [ ![](https://travis-ci.org/lfittl/dblint.svg?branch=master)](https://travis-ci.org/lfittl/dblint)
 
 Automatically checks all SQL queries that are executed during your tests, to find common mistakes, including missing indices and locking issues due to long transactions.
 
@@ -28,7 +28,7 @@ Note that it will check the callstack for the problematic query, and only count 
 ```
 Failures:
 
-  1) FeedsController#show 
+  1) FeedsController#show
      Failure/Error: get :show, format: :atom
      Dblint::Checks::MissingIndex::Error:
        Missing index on oauth_applications for '((twitter_app_name)::text = 'My Feed App'::text)' in 'SELECT  "oauth_applications".* FROM "oauth_applications" WHERE "oauth_applications"."twitter_app_name" = $1 LIMIT 1', called by app/controllers/feeds_controller.rb:6:in `show'

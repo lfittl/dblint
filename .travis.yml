@@ -10,4 +10,6 @@ addons:
   postgresql: 9.5
 before_install:
   - gem install bundler
+before_script:
+  - createdb dblint
 script: bundle exec rake

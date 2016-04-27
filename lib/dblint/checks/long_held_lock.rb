@@ -83,7 +83,7 @@ module Dblint
 
           # We need an explicit begin here since we're interrupting the transaction flow
           ActiveRecord::Base.connection.execute('BEGIN')
-          fail Error, error_msg
+          raise Error, error_msg
 
           # TODO: Add a config setting for enabling this as a warning
           # puts format('Warning: %s', error_msg)

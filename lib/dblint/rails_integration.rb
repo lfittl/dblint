@@ -5,7 +5,7 @@ module Dblint
     CHECKS = [
       Dblint::Checks::LongHeldLock,
       Dblint::Checks::MissingIndex
-    ]
+    ].freeze
 
     def check_instance_for_connection(connid, klass)
       @checks ||= {}

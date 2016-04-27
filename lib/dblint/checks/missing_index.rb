@@ -34,7 +34,7 @@ module Dblint
 
           error_msg = format("Missing index on %s for '%s' in '%s', called by %s",
                              plan['Relation Name'], plan['Filter'], payload[:sql], main_app_caller)
-          fail Error, error_msg
+          raise Error, error_msg
         end
 
         (plan['Plans'] || []).each do |subplan|

@@ -3,6 +3,7 @@ require: rubocop-rspec
 AllCops:
   Exclude:
     - spec/**/*
+    - vendor/**/*
 
 Documentation:
   Enabled: false

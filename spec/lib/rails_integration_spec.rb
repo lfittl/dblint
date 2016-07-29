@@ -4,7 +4,7 @@ RSpec.describe Dblint::RailsIntegration do
   subject { Dblint::RailsIntegration.new }
 
   describe 'private#payload_from_version' do
-    describe 'AR version 4' do
+    describe 'AR version 4', skip: ActiveRecord::VERSION::MAJOR != 4 do
       let(:payload) {
         {
           sql: 'SELECT  "users".* FROM "users" WHERE "users"."id" = $1 AND "users"."visibility" = $2 ORDER BY "users"."id" ASC LIMIT 1',
@@ -36,7 +36,7 @@ RSpec.describe Dblint::RailsIntegration do
       end
     end
 
-    describe "AR version 5" do
+    describe "AR version 5", skip: ActiveRecord::VERSION::MAJOR != 5 do
       let(:payload) {
         {
           sql: 'SELECT  "users".* FROM "users" WHERE "users"."id" = $1 AND "users"."visibility" = $2 ORDER BY "users"."id" ASC LIMIT 1',

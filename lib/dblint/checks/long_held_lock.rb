@@ -61,7 +61,7 @@ module Dblint
         @existing_ids = {}
 
         ActiveRecord::Base.connection.tables.each do |table|
-          next if table == 'schema_migrations'
+          next if %w(schema_migrations ar_internal_metadata).include?(table)
           @existing_ids[table] = ActiveRecord::Base.connection.select_values("SELECT id FROM #{table}", 'DBLINT').map(&:to_i)
         end
       end

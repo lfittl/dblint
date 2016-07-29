@@ -27,8 +27,17 @@ module Dblint
 
       CHECKS.each do |check_klass|
         check = check_instance_for_connection(payload[:connection_id], check_klass)
-        check.statement_finished(name, id, payload)
+        check.statement_finished(name, id, payload_from_version(ActiveRecord::VERSION::MAJOR, payload))
       end
+    end
+
+    private
+
+    def payload_from_version(version, payload)
+      return payload if version == 4
+
+      compatible_binds = payload[:binds].map { |bind| [bind, bind.value] }
+      payload.merge(binds: compatible_binds)
     end
   end
 
